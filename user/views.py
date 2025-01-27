@@ -194,3 +194,50 @@ class AdminUserCRUDView(APIView):
         user.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+class UserCRUDView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            user = User.objects.get(username = request.user.username)
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except User.DoesNotExist:
+            return Response({"message":f"User with username {request.user.username} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+        
+    def put(self, request):
+        try:
+            user = User.objects.get(username=request.user.username)
+        except User.DoesNotExist:
+            return Response({"message":f"User with username {request.user.username} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UserSerializer(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request):
+        try:
+            user = User.objects.get(username=request.user.username)
+        except User.DoesNotExist:
+            return Response({"message":f"User with username {request.user.username} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request):
+        try:
+            user = User.objects.get(username=request.user.username)
+        except User.DoesNotExist:
+            return Response({"message":f"User with username {request.user.username} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        user.is_active = False
+        user.save() 
+        Token.objects.filter(user=user).delete()    
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
