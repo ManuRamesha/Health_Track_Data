@@ -41,3 +41,23 @@ class Gender(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+class Heamophilia(models.Model):
+    heamophilia_id = models.CharField(max_length=3, primary_key=True, editable=False)
+    name = models.CharField(max_length=50, unique=True)
+
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.heamophilia_id:  # Only generate heamophilia_id for new objects
+            last_heamophilia = Heamophilia.objects.order_by('-id').first()
+            next_number = 1 if not last_heamophilia else int(last_heamophilia.heamophilia_id[1:]) + 1
+            self.heamophilia_id = f"H{next_number:02}"  # Format as Hxx with zero-padding
+        super().save(*args, **kwargs)
+
+
+    def __str__(self):
+        return self.name

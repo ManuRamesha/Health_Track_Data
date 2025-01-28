@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'user',
     'tables',
+    'user_profile',
 
 ]
 
