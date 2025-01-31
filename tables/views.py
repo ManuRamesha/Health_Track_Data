@@ -5,8 +5,8 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.exceptions import NotFound
 
-from .models import Role, Gender
-from .serializers import RoleSerializer, GenderSerializer
+from .models import Role, Gender, Heamophilia
+from .serializers import RoleSerializer, GenderSerializer, HeamophiliaSerializer
 
 # Create your views here.
 class RoleCRUDView(APIView):
@@ -122,4 +122,60 @@ class GenderCRUDView(APIView):
             return Response({"message":f"Gender with id {gender_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
 
         gender.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class HeamophiliaCRUDView(APIView):
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, heamophilia_id=None):
+        if heamophilia_id is not None:
+            try:
+                heamophilia = Heamophilia.objects.get(heamophilia_id=heamophilia_id)
+                serializer = HeamophiliaSerializer(heamophilia)
+                return Response(serializer.data)
+            except Heamophilia.DoesNotExist:
+                return Response({"message":f"Heamophilia with id {heamophilia_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        heamophilias = Heamophilia.objects.all()
+        serializer = HeamophiliaSerializer(heamophilias, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request):
+        serializer = HeamophiliaSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request, heamophilia_id):
+        try:
+            heamophilia = Heamophilia.objects.get(heamophilia_id=heamophilia_id)
+        except Heamophilia.DoesNotExist:
+            return Response({"message":f"Heamophilia with id {heamophilia_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = HeamophiliaSerializer(heamophilia, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request, heamophilia_id):
+        try:
+            heamophilia = Heamophilia.objects.get(heamophilia_id=heamophilia_id)
+        except Heamophilia.DoesNotExist:
+            return Response({"message":f"Heamophilia with id {heamophilia_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = HeamophiliaSerializer(heamophilia, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, heamophilia_id):
+        try:
+            heamophilia = Heamophilia.objects.get(heamophilia_id=heamophilia_id)
+        except Heamophilia.DoesNotExist:
+            return Response({"message":f"Heamophilia with id {heamophilia_id} does not exist"}, status=status.HTTP_404_NOT_FOUND)
+
+        heamophilia.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

@@ -24,6 +24,8 @@ class Profile(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    is_active = models.BooleanField(default=True)
+
     def save(self, *args, **kwargs):
         if self.inhibitor == 'yes' and self.inhibitor_percentage is None:
             raise ValidationError("Inhibitor percentage is required when inhibitor is 'yes'.")  

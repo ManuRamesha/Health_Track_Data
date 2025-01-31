@@ -6,11 +6,15 @@ from rest_framework.authtoken.models import Token
 from rest_framework.pagination import PageNumberPagination
 
 
+
+
 from django.contrib.auth import authenticate
+from django.db.models import Q
 
 
 from .serializers import UserSerializer
 from .models import User
+from user_profile.serializers import ProfileSerializer
 
 # Create your views here.
 class RegisterUser(APIView):
@@ -241,3 +245,56 @@ class UserCRUDView(APIView):
         Token.objects.filter(user=user).delete()    
         
         return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class SearchView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+
+        if not request.user.is_staff:
+            return Response({"message": "You are not authorized to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+        
+        if not request.user.is_active:
+            return Response({"message": "Your account is deactivated."}, status=status.HTTP_403_FORBIDDEN)
+        
+        search_query = request.GET.get('q', '').strip()
+
+
+        if not search_query:
+            return Response({"message": "Please provide a search query."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        paginator = PageNumberPagination()
+        paginator.page_size = 10
+        paginator.page_query_param = 'page_size'
+    
+        users = User.objects.select_related('profile').filter(
+            Q(username__icontains=search_query) |
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(email__icontains=search_query) |
+            Q(profile__ka_regd_no__icontains=search_query) 
+            )
+        
+        paginated_users = paginator.paginate_queryset(users, request)   
+
+        result = []
+
+        for user in paginated_users:
+            user_data = UserSerializer(user).data
+            if hasattr(user, 'profile') and user.profile is not None:
+                profile_data = ProfileSerializer(user.profile).data
+            else:
+                profile_data = {}
+
+            user_profile_data = {
+                'user': user_data,
+                'profile': profile_data
+            }
+
+            result.append(user_profile_data)
+        
+        return paginator.get_paginated_response(result)
+
+    
+        
+        

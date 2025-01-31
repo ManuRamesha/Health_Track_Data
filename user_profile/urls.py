@@ -1,9 +1,8 @@
 # these are the django imports
 from django.urls import path
 
-from .views import ProfileCreateListView, ProfileRetrieveUpdateView
+from .views import ProfileCRUDView
 
 urlpatterns = [
-    path('', ProfileCreateListView.as_view()),
-    path('', ProfileRetrieveUpdateView.as_view())
+    path('', ProfileCRUDView.as_view(), name='profile_crud_view')
 ]

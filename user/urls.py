@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import RegisterUser, LoginView, AdminRegisterUser, AdminLoginView, AdminUserCRUDView, UserCRUDView
+from .views import SearchView
 
 
 urlpatterns = [
@@ -14,4 +15,6 @@ urlpatterns = [
     path('admin/user/<str:username>', AdminUserCRUDView.as_view()),
 
     path('user', UserCRUDView.as_view()),
+
+    path('search/', SearchView.as_view())
 ]

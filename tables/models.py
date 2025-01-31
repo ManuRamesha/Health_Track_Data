@@ -12,7 +12,7 @@ class Role(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.role_id:  # Only generate role_id for new objects
-            last_role = Role.objects.order_by('-id').first()
+            last_role = Role.objects.order_by('-role_id').first()
             next_number = 1 if not last_role else int(last_role.role_id[1:]) + 1
             self.role_id = f"R{next_number:02}"  # Format as Rxx with zero-padding
         super().save(*args, **kwargs)
@@ -33,7 +33,7 @@ class Gender(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.gender_id:  # Only generate gender_id for new objects
-            last_gender = Gender.objects.order_by('-id').first()
+            last_gender = Gender.objects.order_by('-gender_id').first()
             next_number = 1 if not last_gender else int(last_gender.gender_id[1:]) + 1
             self.gender_id = f"G{next_number:02}"  # Format as Gxx with zero-padding
         super().save(*args, **kwargs)
@@ -53,7 +53,7 @@ class Heamophilia(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.heamophilia_id:  # Only generate heamophilia_id for new objects
-            last_heamophilia = Heamophilia.objects.order_by('-id').first()
+            last_heamophilia = Heamophilia.objects.order_by('-heamophilia_id').first()
             next_number = 1 if not last_heamophilia else int(last_heamophilia.heamophilia_id[1:]) + 1
             self.heamophilia_id = f"H{next_number:02}"  # Format as Hxx with zero-padding
         super().save(*args, **kwargs)
