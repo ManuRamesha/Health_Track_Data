@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'user',
     'tables',
     'user_profile',
+    'user_daily_track',
 
 ]
 
