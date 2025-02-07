@@ -55,40 +55,40 @@ class DailyTrackViewCRUDView(APIView):
 
 class DownloadMonthlyReportAPIView(APIView):
     """
-    APIView to generate and download a monthly PDF report for DailyTrack data.
+    APIView to generate and download a monthly PDF report for the authenticated user's DailyTrack data.
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, year, month):
         """
-        Generate and return a PDF file containing DailyTrack records for the given year and month.
+        Generate and return a PDF file containing DailyTrack records for the authenticated user.
         """
         # Convert month number to full name
         month_name = calendar.month_name[int(month)]
+        user = request.user  # Get the logged-in user
 
-        # Fetch records for the given month and year
-        daily_records = DailyTrack.objects.filter(date__year=year, date__month=month)
+        # Fetch records for the authenticated user
+        daily_records = DailyTrack.objects.filter(user=user, date__year=year, date__month=month)
 
         if not daily_records.exists():
-            return Response({"message": f"No records found for {month_name} {year}"}, status=404)
+            return Response({"message": f"No records found for {month_name} {year}."}, status=404)
 
         # Create an in-memory buffer
         buffer = io.BytesIO()
         pdf = canvas.Canvas(buffer, pagesize=A4)
-        pdf.setTitle(f"HealthTrack Monthly Report - {month_name} {year}")
+        pdf.setTitle(f"HealthTrack Report - {month_name} {year}")
 
         # Set title
         pdf.setFont("Helvetica-Bold", 16)
-        pdf.drawString(150, 800, f"HealthTrack Monthly Report - {month_name} {year}")
+        pdf.drawString(150, 800, f"HealthTrack Report - {month_name} {year}")
 
         # Table headers
-        data = [["Date", "User", "Break Bleed", "Treatment", "Injection", "Physiotherapy"]]
+        data = [["Date", "Break Bleed", "Treatment", "Injection", "Physiotherapy"]]
 
-        # Populate table with data
+        # Populate table with user data
         for record in daily_records:
             data.append([
                 record.date.strftime("%d-%b-%Y"),
-                record.user.username,
                 record.break_through_bleed,
                 record.treatment_for_bleed if record.treatment_for_bleed else "-",
                 record.inj_hemilibra,
@@ -96,7 +96,7 @@ class DownloadMonthlyReportAPIView(APIView):
             ])
 
         # Create and style table
-        table = Table(data, colWidths=[80, 80, 80, 100, 80, 80])
+        table = Table(data, colWidths=[100, 100, 150, 100, 100])
         table.setStyle(TableStyle([
             ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
             ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
@@ -118,4 +118,4 @@ class DownloadMonthlyReportAPIView(APIView):
         buffer.seek(0)
 
         # Return PDF response
-        return FileResponse(buffer, as_attachment=True, filename=f"HealthTrack_Report_{month_name}_{year}.pdf")
+        return FileResponse(buffer, as_attachment=True, filename=f"HealthTrack_{user.username}_{month_name}_{year}.pdf")
