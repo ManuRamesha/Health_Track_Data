@@ -1,5 +1,8 @@
+# these are django imports
 from django.urls import path
 
+
+# these are the local imports
 from .views import RoleCRUDView, GenderCRUDView, HeamophiliaCRUDView
 
 urlpatterns = [
