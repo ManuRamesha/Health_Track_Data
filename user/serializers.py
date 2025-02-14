@@ -1,7 +1,12 @@
+# these are rest_framework imports
 from rest_framework import serializers
 
-
+# these are local imports
 from  .models import User
+
+"""
+These UserSerializer is used for user registration and user update
+"""
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

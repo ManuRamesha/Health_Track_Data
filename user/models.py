@@ -1,10 +1,10 @@
+# these are django imports
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from datetime import date
 
 
-# from tables import Role, Gender
 # Create your models here.
 class User(AbstractUser):
     date_of_birth = models.DateField(null=True, blank=True)

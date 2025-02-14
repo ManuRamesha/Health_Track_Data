@@ -1,5 +1,7 @@
+# these are django imports
 from django.urls import path
 
+# these are local imports
 from .views import RegisterUser, LoginView, AdminRegisterUser, AdminLoginView, AdminUserCRUDView, UserCRUDView
 from .views import SearchView
 
