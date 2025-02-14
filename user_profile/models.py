@@ -1,3 +1,4 @@
+# these are django imports
 from django.db import models
 from django.core.exceptions import ValidationError
 
