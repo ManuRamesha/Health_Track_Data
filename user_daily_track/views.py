@@ -1,20 +1,23 @@
 import io
 import calendar
+from datetime import datetime
 
-
+# these are rest_framework imports 
 from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from datetime import datetime
+# these are django imports
 from django.http import FileResponse
 
+# these are reportlab imports
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.platypus import Table, TableStyle
 
+# these are local imports
 from .models import DailyTrack
 from .serializers import DailyTrackSerializer
 from user_profile.models import Profile
@@ -23,14 +26,53 @@ from user.models import User
 
 # Create your views here.
 class DailyTrackViewCRUDView(APIView):
+
+    """
+    APIView to perform CRUD operations on DailyTrack data for the authenticated user.
+
+    Allows the authenticated user to:
+    - Get their DailyTrack data via a GET request.
+    - Create new DailyTrack records via a POST request.
+    - Update existing DailyTrack data via a PUT request.
+    - Partially update existing DailyTrack data via a PATCH request.
+
+    Permissions:
+    - Requires the user to be authenticated.
+
+    Methods:
+    - GET: Fetch all DailyTrack records for the authenticated user.
+    - POST: Create a new DailyTrack record for the authenticated user.
+    - PUT: Fully update an existing DailyTrack record for the authenticated user.
+    - PATCH: Partially update an existing DailyTrack record for the authenticated user.
+    """
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        """
+        Fetch all DailyTrack records for the authenticated user.
+
+        Returns:
+        - 200 OK with the list of DailyTrack records if successful.
+        - 404 NOT FOUND if no records are found for the user.
+        """
+
         daily_tracks = DailyTrack.objects.filter(user=request.user)
         serializer = DailyTrackSerializer(daily_tracks, many=True)
         return Response(serializer.data)
 
     def post(self, request):
+
+        """
+        Create a new DailyTrack record for the authenticated user.
+
+        Accepts:
+        - POST request with DailyTrack data.
+
+        Returns:
+        - 201 CREATED with the new DailyTrack record data if successful.
+        - 400 BAD REQUEST if the data is invalid.
+        """
         serializer = DailyTrackSerializer(data=request.data)
         request.data['user'] = request.user.id
         if serializer.is_valid():
@@ -39,6 +81,17 @@ class DailyTrackViewCRUDView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request):
+
+        """
+        Fully update an existing DailyTrack record for the authenticated user.
+
+        Accepts:
+        - PUT request with updated DailyTrack data.
+
+        Returns:
+        - 200 OK with the updated DailyTrack record data if successful.
+        - 400 BAD REQUEST if the data is invalid.
+        """
         user = request.user
         daily_track = DailyTrack.objects.get(user=user)
         serializer = DailyTrackSerializer(daily_track, data=request.data)
@@ -48,6 +101,17 @@ class DailyTrackViewCRUDView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def patch(self, request):
+
+        """
+        Partially update an existing DailyTrack record for the authenticated user.
+
+        Accepts:
+        - PATCH request with partial DailyTrack data.
+
+        Returns:
+        - 200 OK with the partially updated DailyTrack record data if successful.
+        - 400 BAD REQUEST if the data is invalid.
+        """
         user = request.user
         daily_track = DailyTrack.objects.get(user=user)
         serializer = DailyTrackSerializer(daily_track, data=request.data, partial=True)
@@ -59,12 +123,29 @@ class DailyTrackViewCRUDView(APIView):
 class DownloadMonthlyReportAPIView(APIView):
     """
     APIView to generate and download a monthly PDF report for the authenticated user's DailyTrack data.
+    This view generates a PDF report with the user's health data for a specified month and year.
+    The PDF contains the user's personal details, medical profile, and daily health records for the month.
+
+    Permissions:
+    - Requires the user to be authenticated.
+
+    Methods:
+    - GET: Generate and download the monthly PDF report.
     """
     permission_classes = [IsAuthenticated]
 
     def get(self, request, year, month):
         """
         Generate and return a PDF file containing DailyTrack records for the authenticated user.
+         Accepts:
+        - year: The year for the report (e.g., 2025).
+        - month: The month for the report (1-12).
+
+        Returns:
+        - A PDF file containing the health report for the specified month and year.
+        - 404 NOT FOUND if no records exist for the specified month and year.
+        - 404 NOT FOUND if the user profile is not found.
+        
         """
         month_name = calendar.month_name[int(month)]
         user = request.user  # Get logged-in user

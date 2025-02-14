@@ -1,4 +1,7 @@
+# these are rest_framework imports
 from rest_framework import serializers
+
+# these are local imports
 from .models import DailyTrack
 
 class DailyTrackSerializer(serializers.ModelSerializer):

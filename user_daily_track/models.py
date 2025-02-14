@@ -1,3 +1,4 @@
+# these are django imports
 from django.db import models
 from django.utils import timezone
 
