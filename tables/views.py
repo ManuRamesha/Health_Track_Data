@@ -1,3 +1,4 @@
+# these are rest_framework imports
 from rest_framework.views import APIView
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, CreateAPIView
 from rest_framework.response import Response
@@ -5,10 +6,19 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.exceptions import NotFound
 
+
+#These are the local imports
 from .models import Role, Gender, Heamophilia
 from .serializers import RoleSerializer, GenderSerializer, HeamophiliaSerializer
 
 # Create your views here.
+
+"""
+These views  are used to handle the CRUD opertions for the Role, Gender and Heamophilia models.
+They user RoleSerializer, GenderSerializer and HeamophiliaSerializer to serialize  and deserialize the data.
+The views are accessed using the APIView class and the appropriate HTTP methods (GET, POST, PUT, PATCH, DELETE).
+The views are protected by the IsAuthenticated permission class, which ensures that only authenticated users can access the views.
+"""
 class RoleCRUDView(APIView):
     permission_classes = [IsAdminUser]
 
